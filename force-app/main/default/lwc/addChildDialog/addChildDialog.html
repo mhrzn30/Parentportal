@@ -1,0 +1,17 @@
+<template>
+  <div class="dialog-backdrop" onkeydown={handleKeydown}>
+    <div
+      class="dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="add-child-title"
+    >
+      <h2 id="add-child-title" tabindex="-1">Adding a child is coming soon</h2>
+      <p>
+        Linking a child requires school verification. Contact Family Support and
+        we'll link them for you in the meantime.
+      </p>
+      <button type="button" onclick={handleClose}>Close</button>
+    </div>
+  </div>
+</template>

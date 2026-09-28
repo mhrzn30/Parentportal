@@ -1,0 +1,108 @@
+<template>
+  <div class="ppc-chat notranslate">
+    <template if:true={isOpen}>
+      <section class="ppc-chat__panel" aria-label="Family Assistant chat">
+        <header class="ppc-chat__header">
+          <div>
+            <p class="ppc-chat__eyebrow">Northbridge Schools</p>
+            <h2>Family Assistant</h2>
+          </div>
+          <button
+            class="ppc-chat__icon-button"
+            type="button"
+            aria-label="Close Family Assistant"
+            title="Close"
+            onclick={handleToggle}
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </header>
+
+        <div
+          class="ppc-chat__body"
+          role="log"
+          aria-live="polite"
+          aria-label="Conversation"
+        >
+          <template if:true={hasMessages}>
+            <template for:each={messages} for:item="message">
+              <div key={message.id} class={message.cssClass}>
+                <lightning-formatted-text
+                  value={message.text}
+                ></lightning-formatted-text>
+              </div>
+            </template>
+          </template>
+
+          <template if:false={hasMessages}>
+            <p class="ppc-chat__empty">
+              Ask a question about applying, documents, or your family
+              dashboard.
+            </p>
+          </template>
+
+          <template if:true={isLoading}>
+            <div
+              class="ppc-chat__message ppc-chat__message--assistant ppc-chat__typing"
+              role="status"
+            >
+              Thinking...
+            </div>
+          </template>
+        </div>
+
+        <template if:true={hasStarted}>
+          <div class="ppc-chat__starters" aria-label="Suggested questions">
+            <template for:each={starterQuestions} for:item="question">
+              <button
+                key={question}
+                class="ppc-chat__chip"
+                type="button"
+                data-question={question}
+                onclick={handleStarterQuestion}
+              >
+                {question}
+              </button>
+            </template>
+          </div>
+        </template>
+
+        <form class="ppc-chat__composer" onsubmit={handleSubmit}>
+          <label class="ppc-chat__sr-only" for="family-assistant-message"
+            >Ask Family Assistant</label
+          >
+          <input
+            id="family-assistant-message"
+            class={inputClass}
+            type="text"
+            value={draftMessage}
+            placeholder="Ask a question..."
+            autocomplete="off"
+            oninput={handleInput}
+            onkeydown={handleKeydown}
+          />
+          <button
+            class="ppc-chat__send"
+            type="submit"
+            disabled={isLoading}
+            aria-label="Send message"
+            title="Send"
+          >
+            <span aria-hidden="true">&rarr;</span>
+          </button>
+        </form>
+      </section>
+    </template>
+
+    <button
+      class="ppc-chat__launcher"
+      type="button"
+      aria-label={panelLabel}
+      title={panelLabel}
+      onclick={handleToggle}
+    >
+      <span class="ppc-chat__launcher-icon" aria-hidden="true">&#9993;</span>
+      <span class="ppc-chat__launcher-label">Ask Family Assistant</span>
+    </button>
+  </div>
+</template>

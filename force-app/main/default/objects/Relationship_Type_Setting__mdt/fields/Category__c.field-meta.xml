@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Category__c</fullName>
+    <description>Which side of the relationship Type_Value__c describes: Child (on the parent's own hed__Relationship__c record, e.g. &quot;Daughter&quot;) or Guardian (EDA's auto-created reciprocal on the child's record, e.g. &quot;Father&quot;). Access filtering uses Child-category values only.</description>
+    <label>Category</label>
+    <required>true</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Child</fullName>
+                <default>false</default>
+                <label>Child</label>
+            </value>
+            <value>
+                <fullName>Guardian</fullName>
+                <default>false</default>
+                <label>Guardian</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

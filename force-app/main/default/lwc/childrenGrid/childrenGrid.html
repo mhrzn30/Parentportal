@@ -1,0 +1,40 @@
+<template>
+  <div class="children-grid-wrap" aria-busy={isLoading}>
+    <p lwc:if={isLoading} class="sr-only" role="status">
+      Loading your children.
+    </p>
+
+    <ul lwc:if={isLoading} class="children-grid" aria-hidden="true">
+      <li class="skeleton"></li>
+      <li class="skeleton"></li>
+      <li class="skeleton"></li>
+    </ul>
+
+    <ul lwc:elseif={isPopulated} class="children-grid">
+      <template for:each={children} for:item="child">
+        <c-child-card
+          key={child.id}
+          child={child}
+          onchildselect={handleChildSelect}
+        ></c-child-card>
+      </template>
+    </ul>
+
+    <div
+      lwc:elseif={isEmpty}
+      class="state-message state-message--empty"
+      role="status"
+    >
+      <h3>No children linked yet</h3>
+      <p>When a school links a child to your account, they'll appear here.</p>
+    </div>
+
+    <div lwc:else class="state-message state-message--error" role="alert">
+      <h3>We couldn't load your children</h3>
+      <p>
+        Please try again, or contact Family Support if the problem continues.
+      </p>
+      <button type="button" onclick={handleRetry}>Try again</button>
+    </div>
+  </div>
+</template>

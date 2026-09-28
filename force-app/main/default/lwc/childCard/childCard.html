@@ -1,0 +1,18 @@
+<template>
+  <li class="child-card notranslate">
+    <span class="child-card__avatar" aria-hidden="true"></span>
+    <h3 class="child-card__name">
+      <button class="child-card__action" type="button" onclick={handleActivate}>
+        {displayName}
+      </button>
+    </h3>
+    <p class="child-card__meta">{metaText}</p>
+    <ul lwc:if={hasApplications} class="child-card__badges">
+      <template for:each={applications} for:item="app">
+        <li key={app.id}>
+          <c-status-badge status={app.status}></c-status-badge>
+        </li>
+      </template>
+    </ul>
+  </li>
+</template>

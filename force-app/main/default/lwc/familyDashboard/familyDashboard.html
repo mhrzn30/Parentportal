@@ -1,0 +1,31 @@
+<template>
+  <section class="dashboard">
+    <div class="dashboard__header">
+      <h2>{headingText}</h2>
+      <button
+        lwc:if={showAddChild}
+        type="button"
+        class="dashboard__add"
+        onclick={handleAddChildOpen}
+      >
+        Add a child
+      </button>
+    </div>
+
+    <c-children-grid
+      lwc:if={isGridView}
+      onchildselect={handleChildSelect}
+    ></c-children-grid>
+
+    <c-child-detail
+      lwc:elseif={isDetailView}
+      child-id={selectedChildId}
+      onback={handleBack}
+    ></c-child-detail>
+
+    <c-add-child-dialog
+      lwc:if={isAddChildOpen}
+      onclose={handleAddChildClose}
+    ></c-add-child-dialog>
+  </section>
+</template>

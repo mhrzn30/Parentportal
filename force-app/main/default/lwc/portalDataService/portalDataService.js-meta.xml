@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>Portal Data Service</masterLabel>
+    <description
+  >The only module UI components import for parent/child data. Mock now; swap the implementation for Apex later.</description>
+</LightningComponentBundle>

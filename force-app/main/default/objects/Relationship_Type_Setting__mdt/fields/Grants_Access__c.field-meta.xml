@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Grants_Access__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Whether a Current hed__Relationship__c row with this Type_Value__c grants the parent access to the related Contact. Any hed__Type__c value with no record here, or with this unchecked, grants no access.</description>
+    <label>Grants Access</label>
+    <type>Checkbox</type>
+</CustomField>

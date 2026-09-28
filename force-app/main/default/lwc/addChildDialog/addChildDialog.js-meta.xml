@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>Add A Child (Placeholder)</masterLabel>
+    <description
+  >Placeholder dialog for the verified add-child flow, built later. Does not link a child.</description>
+</LightningComponentBundle>

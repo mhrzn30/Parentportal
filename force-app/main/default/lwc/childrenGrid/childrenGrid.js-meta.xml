@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>Children Grid</masterLabel>
+    <description
+  >Fetches and renders the signed-in parent's linked children as cards, with loading/empty/error states.</description>
+</LightningComponentBundle>

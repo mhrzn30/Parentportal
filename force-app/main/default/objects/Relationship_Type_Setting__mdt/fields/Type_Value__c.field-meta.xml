@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Type_Value__c</fullName>
+    <description>The exact hed__Relationship__c.hed__Type__c picklist value this record classifies, e.g. &quot;Daughter&quot; or &quot;Father&quot;.</description>
+    <label>Type Value</label>
+    <length>80</length>
+    <required>true</required>
+    <type>Text</type>
+    <unique>true</unique>
+</CustomField>

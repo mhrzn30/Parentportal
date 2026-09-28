@@ -1,0 +1,40 @@
+:host {
+  --app-orange: #f7941e;
+  --app-orange-dark: #da7a08;
+  --app-ink: #1a1a1a;
+  --app-muted: #5f6368;
+  --app-line: #e3e6ea;
+  --app-panel: #ffffff;
+  --app-page: #f7f8fa;
+  --app-shadow: 0 16px 44px rgb(26 26 26 / 22%);
+  display: block;
+  color: var(--app-ink);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.dashboard__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.dashboard__header h2 {
+  margin: 0;
+}
+
+.dashboard__add {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--app-orange);
+  color: var(--app-ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dashboard__add:hover,
+.dashboard__add:focus-visible {
+  background: var(--app-orange-dark);
+}
