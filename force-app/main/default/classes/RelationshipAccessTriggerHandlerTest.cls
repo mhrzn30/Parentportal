@@ -14,7 +14,10 @@ private class RelationshipAccessTriggerHandlerTest {
     User portalUser = TestDataFactory.createPortalUser(household.parent);
 
     // No explicit resyncForParents call -- TestDataFactory.createHousehold's
-    // insert of the hed__Relationship__c row is what must trigger it.
+    // insert of the hed__Relationship__c row is what must trigger it. The
+    // trigger publishes Guardian_Access_Resync__e; deliver() runs the
+    // subscriber the way the event bus would after commit.
+    Test.getEventBus().deliver();
     System.runAs(portalUser) {
       Assert.areEqual(
         1,
