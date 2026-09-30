@@ -92,7 +92,7 @@
             <assignToReference>childrenNames</assignToReference>
             <operator>Add</operator>
             <value>
-                <stringValue>   {!childrenNames}{!Loop_Collect_Student_Ids.FirstName} {!Loop_Collect_Student_Ids.LastName},</stringValue>
+                <stringValue>{!Loop_Collect_Student_Ids.FirstName} {!Loop_Collect_Student_Ids.LastName}, </stringValue>
             </value>
         </assignmentItems>
         <connector>

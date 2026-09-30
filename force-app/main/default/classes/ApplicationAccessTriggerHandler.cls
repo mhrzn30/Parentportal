@@ -45,11 +45,14 @@ public with sharing class ApplicationAccessTriggerHandler {
     if (applicantIds.isEmpty()) {
       return;
     }
+    // SYSTEM_MODE: whoever saved the application (staff, integration) may
+    // lack field access to relationships; this only yields Ids to publish.
     Set<Id> parentIds = RelationshipSelector.parentIdsForChildren(
-      applicantIds
+      applicantIds,
+      AccessLevel.SYSTEM_MODE
     );
     if (!parentIds.isEmpty()) {
-      GuardianAccessSharingService.resyncForParents(parentIds);
+      GuardianAccessSharingService.requestResync(parentIds);
     }
   }
 }

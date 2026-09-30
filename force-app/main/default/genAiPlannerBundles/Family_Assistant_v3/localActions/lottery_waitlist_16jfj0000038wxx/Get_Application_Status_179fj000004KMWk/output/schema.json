@@ -1,0 +1,16 @@
+{
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "applicationSummary" : {
+      "title" : "applicationSummary",
+      "description" : "The agent now knows the applicationSummary format is StudentFirstName | SchoolName | Status, semicolon-separated for multiple applications. It will split on semicolons and present each one on its own line, showing the student's name, school, and status clearly.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType",
+  "lightning:textIndexed" : true
+}

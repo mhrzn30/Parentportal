@@ -7,6 +7,8 @@ The parent portal dashboard (`c/familyDashboard`) is now wired to real EDA data 
 
 **Update:** `GuardianAccessSharingService` + relationship-type classification (open item 4) are now built and deployed — a real Experience Cloud/Customer Community Plus portal user now gets genuine record-level visibility into their own linked children's Contact and `hed__Application__c` records via Apex-managed sharing, verified with `System.runAs(portalUser)` in `GuardianAccessSharingServiceTest` and the trigger handler tests. See "Relationship-Type Access & Guardian Sharing" below for the full breakdown.
 
+**Update (2026-09-30):** The agent now uses the signed-in portal parent's identity (server-set `PortalParentContactId`, no hardcoded Id) and shows only their own children's status — agent **v4** live; it also answers "What's my name?" from the server-set `PortalParentFirstName`; see "Agent Identity & Data Access".
+
 ## Done
 - [x] Connected App configured for Client Credentials Flow (run-as user set, scopes `api chatbot_api sfap_api`)
 - [x] External Credential `Family_Assistant_Agent_API` configured: OAuth 2.0, Client Credentials with Client Secret Flow, token endpoint `https://orgfarm-ba5ad2787e-dev-ed.develop.my.salesforce.com/services/oauth2/token`, Pass Client Credentials in Request Body checked, Scope field left blank
@@ -36,6 +38,8 @@ Separate from the agent work above: a parent-facing dashboard UI, now wired to r
 - [x] `PortalDataControllerTest.cls`: happy path + cross-household denial (the catalog's minimum two-household scenarios for this pass; bulk/inactive-user/ended-relationship scenarios deferred). Calls the `@TestVisible` seams directly with an explicit parent Contact id rather than through a real portal user — passes both via deploy-triggered test run and standalone `sf apex run test`.
 - [x] `Family_Portal_Data_Access` permission set (new, source-retrieved, least-privilege read-only): Contact/Account/`hed__Relationship__c`/`hed__Application__c` object read + the specific custom fields queried. Required-field FLS entries (e.g. `hed__Contact__c`) omitted — Salesforce rejects explicit FLS on fields that are always implicitly readable.
 - [x] 33 Jest tests passing (8 suites, `portalDataService.test.js` rewritten to mock `@salesforce/apex/PortalDataController.*`); `npm run lint` and `npx prettier --check` clean on all new/changed files.
+- [x] 2026-09-28: `c/familyAssistantChat` embedded in `c/familyDashboard`, outside the grid/detail `lwc:if` swap so the chat (and its Agent API session) survives switching views. New `hideChat` `@api`/App Builder toggle (default `false`) to avoid a duplicate bubble if the chat is also placed on the page separately. 3 new Jest tests (present, same instance across view swap, hideable); dashboard + chat suites 14/14 passing. Deployed 2026-09-29 (Deploy ID `0Affj00000T5P9zCAF`, succeeded).
+- [x] 2026-09-29: On the site the chat returned "The Family Assistant is unavailable right now." Cause: the Apex callout runs as the portal user, and only one internal user held the `Family_Assistant_Agent_API` permission set (External Credential principal access). Fix: added `externalCredentialPrincipalAccesses` → `Family_Assistant_Agent_API-Agent_API_Creds` to `Family_Portal_Parent` (Customer Community Plus Login license accepts it; deployed). VS Code's XML schema falsely flags that element — ignore it.
 - [ ] Not yet placed on a Lightning App Page/FlexiPage for browser click-through (no `flexipages`/`applications` exist yet — this is the actual next surface, not Experience Cloud).
 - [x] **Real Experience Cloud portal-user access now works** — `GuardianAccessSharingService` (Apex managed sharing) built; see the section below. Open item 4 done.
 - [ ] Support contact / agent id are still hardcoded in `familyAssistantChat.js` — belongs in Custom Metadata Type, not fixed in this pass.
@@ -53,6 +57,56 @@ Which `hed__Relationship__c` types grant a parent access to a child, and the rea
 - [x] Contact OWD (internal + external `sharingModel`/`externalSharingModel`) changed from `ControlledByParent` to `Private`, deployed as its own pass before the dependent Apex (see Known Gotchas) — required for `ContactShare` rows to be insertable/effective at all. `hed__Application__c`'s *external* sharing model was already `Private` (distinct from its internal `ReadWrite`), so it was left alone.
 - [x] 12 new/changed Apex test classes, including `System.runAs(portalUser)` assertions per CLAUDE.md's testing philosophy: happy path, second guardian vs. unrelated household member, cross-household denial, Former status, unclassified picklist value, turning `Grants_Access__c` off, inactive/reactivated portal user, new application visible immediately, bulk 200. Verified via both a deploy-triggered `RunLocalTests` run (187/187 components, 65/65 tests) and a standalone `sf apex run test` (100% pass rate) per CLAUDE.md's "always verify standalone, not only via deploy" gotcha.
 - [ ] Not done in this pass: no admin-facing UI for editing `Relationship_Type_Setting__mdt` (edit via Setup's Custom Metadata Types page); no re-check of whether `Family_Portal_Data_Access` needs new field grants for anything beyond what it already had (it didn't — verified).
+
+## Agent Identity & Data Access (2026-09-29 – 09-30)
+The agent now serves the signed-in portal parent's own children, with no hardcoded Contact Id.
+
+- [x] `Family_Assistant_Agent_Data_Access` permission set (new, source-tracked), assigned only to
+  `EinsteinServiceAgent User`: read + **View All** on Contact, `hed__Relationship__c`,
+  `hed__Application__c`; read on Account; the 6 queried fields; `Relationship_Type_Setting__mdt`
+  access. No create/edit/delete. Fixed, in order: `sObject type ... is not supported` (CMDT, then
+  object access = missing permission), then 0 rows (Contact OWD Private + `with sharing`).
+- [x] Agent retrieved into source: `aiAuthoringBundles/Family_Assistant/` (was org-only).
+- [x] Removed a model-filled duplicate binding (`with parentContactId = ...`) in account_dashboard —
+  let the LLM choose whose data to look up.
+- [x] `DevContactId` (hardcoded) → `PortalParentContactId: mutable string = ""` with
+  `visibility: "External"` (Builder: "Enable API write access"). Both bindings use it plus
+  `available when @variables.PortalParentContactId != ""`, so anonymous sessions can't reach the action.
+- [x] `CurrentParentSelector.contactId()` (new, `with sharing`): the single
+  `UserInfo.getUserId() → User.ContactId` resolver; `PortalDataController` now uses it (private copy removed).
+- [x] `FamilyAssistantAgentController.startSession()` sends
+  `{ name: PortalParentContactId, type: Text, value: <ContactId> }` only when there is a parent;
+  `sendMessage()` never sends `variables`.
+- [x] Conditional instructions (`if` / `else` on `PortalParentContactId`) in lottery_waitlist and
+  account_dashboard: no parent → sign-in message, never `[placeholder]` templates.
+- [x] account_dashboard: removed a real person's name from an example and a reference to a
+  non-existent `parentFullName` output.
+- [x] Flow `Get_Application_Status` v9: `Assignment_6` no longer appends `childrenNames` to itself
+  (2 children produced "A, A, B,").
+- [x] Tests: `CurrentParentSelectorTest` (2), `FamilyAssistantAgentControllerTest` +3
+  (`portalParentSessionSendsOwnContactId`, `userWithoutContactSendsNoParentIdentity`,
+  `sendMessageNeverSendsVariables`) — 8/8; `PortalDataControllerTest` still 3/3.
+- [x] Released: agent **v3 Active** (rollback: `sf agent activate --api-name Family_Assistant --version 2`).
+  Verified on the site (own child's status, one reply) and in Postman without the variable
+  (sign-in message, no placeholders). (Superseded by v4, see below.)
+- [ ] `childrenNames` not reaching the model: the action's saved schema only lists
+  `applicationSummary`; publish rejects declaring `childrenNames` until the schema is refreshed.
+  Children with no application are therefore not listed.
+- [x] "What's my name?" (2026-09-30): `startSession()` also sends `PortalParentFirstName`
+  (`UserInfo.getFirstName()`, External, default `""`), only when there is a parent. Unused `FullName`
+  variable removed. account_dashboard description mentions the parent's name (fixes routing to
+  ambiguous_question); the name rule is in the `if`, and the no-parent `else` never gives a name.
+  Test `portalParentSessionSendsOwnFirstName` + a no-name assertion — controller 9/9.
+  Released: agent **v4 Active** (rollback: `--version 3`); verified on the site and in Postman.
+- [ ] `GuardianAccessResyncConfig` hardcodes the sharing user's username — set it per org before
+  deploying elsewhere.
+- [ ] Flow still queries inside a loop (`Get_Student`/`Get_School` in `Loop_Build_Summary`).
+- [ ] Remove the manual Setup grants added to an Agentforce auto-generated permission set during
+  debugging (superseded by `Family_Assistant_Agent_Data_Access`).
+- [ ] Assignment of `Family_Assistant_Agent_Data_Access` is org data — repeat per org:
+  `sf org assign permset --name Family_Assistant_Agent_Data_Access --on-behalf-of <agent username>`.
+- [ ] Local AgentScript compiler not usable on this machine (`spawnSync npm ENOENT`); using
+  `sf agent validate authoring-bundle` instead.
 
 ## Not Yet Done
 - [ ] Add the component to a Lightning App Page and click through it in the browser (repo currently has no `flexipages`/`applications` to drop it on — needs one created) before touching Experience Cloud
@@ -86,6 +140,26 @@ Which `hed__Relationship__c` types grant a parent access to a child, and the rea
 - Follow existing repo conventions — match the codebase's existing ESLint/Prettier config, naming conventions, and folder structure; don't introduce a second style within the same LWC namespace.
 - Accessibility per spec: bubble and close button need `aria-label`, input needs an associated label, Enter key sends — don't drop these while refactoring.
 
+## Test Data
+Household 1 (Maharjan): parent Contact `003fj00001jtXAbAAM`, student `003fj00001jtXAcAAM`,
+2 applications (different schools/statuses). A second household with one child exists (used for
+the Postman External-variable test). No two-child household yet — needed to verify `childrenNames`.
+
+## Open Items (in order)
+1. ~~Confirm portal license type (gates sharing approach).~~ Done — Customer Community Plus.
+2. ~~Replace hardcoded `DevContactId` with the real session context variable.~~ Done —
+   `PortalParentContactId` (External), set by `startSession()`; see "Agent Identity & Data Access".
+3. ~~Create a second household; test-first cross-household isolation (portal + agent).~~ Done —
+   `RelationshipSelectorTest`/`GuardianAccessSharingServiceTest` cover this via
+   `System.runAs(portalUser)` with two households.
+4. ~~Build `GuardianAccessSharingService` + triggers, tests first.~~ Done — see above.
+5. Build `FamilyAssistantAgentController` + `familyAssistantChat` with tests; App Page, then portal.
+   (Controller/LWC done per above; still needs an App Page and Experience Cloud rollout.)
+6. Verified add-child flow, parent profile view/edit, document upload.
+7. Least-privilege review of `EinsteinServiceAgent User` permission set.
+8. Republish the Experience site once one exists (LWR serves a published snapshot) — not yet
+   applicable; no site/digital experience has been created yet in this repo.
+
 ## Decisions Log
 - `sendMessage`/`startSession` throw a generic `AuraHandledException('The Family Assistant is unavailable right now.')` on any callout failure or non-2xx status, rather than surfacing the underlying HTTP status or response body to the client. Keeps internal error detail (and any agent-side error text) out of the browser and console, per the no-PII-in-logs guardrail.
 - `sessionId`/`sequenceId` are tracked as plain (non-`@track`) component fields in the LWC, not persisted to browser storage, so a page refresh always starts a fresh agent session rather than resuming a stale one silently.
@@ -100,3 +174,14 @@ Which `hed__Relationship__c` types grant a parent access to a child, and the rea
 - `GuardianAccessSharingService.resyncForParents`/`revokeForParents` take parent **Contact** ids (matching every other consumer's identity) but resolve each one's active portal **User** id internally before writing shares — `ContactShare`/`hed__Application__Share.UserOrGroupId` must be a User/Group Id, not a Contact Id (`FIELD_INTEGRITY_EXCEPTION` otherwise, caught via a live deploy). A parent with no active portal user yet is silently skipped by `resyncForParents` (nothing to share to); `revokeForParents` looks up the User without the `IsActive` filter, since by the time it runs (just-deactivated) the user is already inactive and its stale shares still need removing.
 - Chose to flip Contact OWD to `Private` (both internal and external sharing model) as its own separate deploy before the dependent Apex/triggers, after a combined deploy failed with "Field is not writeable" on `ContactShare` fields — object metadata apparently doesn't reliably apply before Apex compiles in the same deploy transaction. Did not flip `hed__Application__c`'s internal OWD (left `ReadWrite`); its *external* sharing model was already `Private` from before this pass, which is the one that actually gates portal/external users, so no change was needed there.
 - `gradeLevel`, child-level `schoolName`, and `lotteryNumber` return `null` from `PortalDataController` rather than a guessed field mapping — no confirmed field exists for any of the three in this org (checked via `sf sobject describe`). Add real mappings once the fields are confirmed or created.
+- Agent data access via a dedicated `Family_Assistant_Agent_Data_Access` permission set with read-only
+  View All, not by editing Agentforce's auto-generated permission sets (can be regenerated on publish)
+  or reusing portal/sharing sets (would give parents View All, or give the agent Modify All). The agent
+  runs as one user for every parent, so sharing can't separate households; isolation is the action
+  filtering by the server-set `PortalParentContactId`. View All creates no share rows, so it scales.
+- Identity lookup moved into `CurrentParentSelector` now rather than copied into the agent controller —
+  one place for the most security-sensitive rule; portal regression covered by `PortalDataControllerTest`.
+- Anonymous-session behaviour enforced with AgentScript `if`/`else` instructions and `available when`,
+  not with "don't guess" wording — the platform controls what the model sees; instructions are hints.
+- Released agent v3 without the `childrenNames` output declaration rather than blocking the placeholder
+  fix on an unrelated action-schema refresh.

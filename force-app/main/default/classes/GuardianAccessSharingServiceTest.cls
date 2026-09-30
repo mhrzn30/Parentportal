@@ -80,6 +80,11 @@ private class GuardianAccessSharingServiceTest {
       shareCount,
       'Running resync twice must not create a duplicate share row'
     );
+    Assert.areEqual(
+      1,
+      relationshipShareCount(portalUser.Id),
+      'Running resync twice must not create a duplicate relationship share row'
+    );
   }
 
   @isTest
@@ -331,5 +336,158 @@ private class GuardianAccessSharingServiceTest {
       ],
       'Bulk resync must produce exactly one share per child, even run twice'
     );
+    Assert.areEqual(
+      200,
+      relationshipShareCount(bulkPortalUser.Id),
+      'Bulk resync must produce exactly one relationship share per relationship, even run twice'
+    );
+  }
+
+  @isTest
+  static void resyncGrantsPortalUserAccessToOwnRelationship() {
+    TestDataFactory.Household household = TestDataFactory.createHousehold(
+      'Haddad',
+      'Daughter'
+    );
+    User portalUser = TestDataFactory.createPortalUser(household.parent);
+
+    Test.startTest();
+    GuardianAccessSharingService.resyncForParents(
+      new Set<Id>{ household.parent.Id }
+    );
+    Test.stopTest();
+
+    System.runAs(portalUser) {
+      Assert.areEqual(
+        1,
+        [
+          SELECT COUNT()
+          FROM hed__Relationship__c
+          WHERE
+            hed__Contact__c = :household.parent.Id
+            AND hed__RelatedContact__c = :household.student.Id
+        ],
+        'Resync must let the parent see their own relationship to their child -- the portal reads children through it'
+      );
+    }
+  }
+
+  @isTest
+  static void parentInHouseholdACannotSeeRelationshipInHouseholdB() {
+    TestDataFactory.Household householdA = TestDataFactory.createHousehold(
+      'Nakamura',
+      'Son'
+    );
+    TestDataFactory.Household householdB = TestDataFactory.createHousehold(
+      'Oyelaran',
+      'Daughter'
+    );
+    User portalUserA = TestDataFactory.createPortalUser(householdA.parent);
+    TestDataFactory.createPortalUser(householdB.parent);
+
+    GuardianAccessSharingService.resyncForParents(
+      new Set<Id>{ householdA.parent.Id, householdB.parent.Id }
+    );
+
+    System.runAs(portalUserA) {
+      Assert.areEqual(
+        0,
+        [
+          SELECT COUNT()
+          FROM hed__Relationship__c
+          WHERE hed__Contact__c = :householdB.parent.Id
+        ],
+        'Household A\'s portal user must not see Household B\'s relationships'
+      );
+    }
+  }
+
+  @isTest
+  static void endingRelationshipRemovesRelationshipAccess() {
+    TestDataFactory.Household household = TestDataFactory.createHousehold(
+      'Castellanos',
+      'Son'
+    );
+    User portalUser = TestDataFactory.createPortalUser(household.parent);
+    GuardianAccessSharingService.resyncForParents(
+      new Set<Id>{ household.parent.Id }
+    );
+
+    hed__Relationship__c relationship = [
+      SELECT Id, hed__Status__c
+      FROM hed__Relationship__c
+      WHERE
+        hed__Contact__c = :household.parent.Id
+        AND hed__RelatedContact__c = :household.student.Id
+    ];
+
+    Test.startTest();
+    relationship.hed__Status__c = 'Former';
+    update relationship;
+    GuardianAccessSharingService.resyncForParents(
+      new Set<Id>{ household.parent.Id }
+    );
+    Test.stopTest();
+
+    System.runAs(portalUser) {
+      Assert.areEqual(
+        0,
+        [SELECT COUNT() FROM hed__Relationship__c WHERE Id = :relationship.Id],
+        'Ending the relationship and resyncing must remove the parent\'s access to it'
+      );
+    }
+  }
+
+  /**
+   * A parent adding a child from the portal requests the resync as the
+   * parent themselves, before they have access to anything. The shares must
+   * come out the same as when an admin runs it.
+   */
+  @isTest
+  static void resyncRequestedByTheParentThemselvesStillGrantsAccess() {
+    TestDataFactory.Household household = TestDataFactory.createHousehold(
+      'Vanderberg',
+      'Daughter'
+    );
+    User portalUser = TestDataFactory.createPortalUser(household.parent);
+    // Flush the user trigger's own resync event first, so the only thing
+    // that can grant access below is the parent's own request.
+    Test.getEventBus().deliver();
+    GuardianAccessSharingService.revokeForParents(
+      new Set<Id>{ household.parent.Id }
+    );
+
+    Test.startTest();
+    System.runAs(portalUser) {
+      GuardianAccessSharingService.requestResync(
+        new Set<Id>{ household.parent.Id }
+      );
+    }
+    Test.stopTest();
+
+    System.runAs(portalUser) {
+      Assert.areEqual(
+        1,
+        [SELECT COUNT() FROM Contact WHERE Id = :household.student.Id],
+        'Resync run as the parent must still grant access to their child'
+      );
+      Assert.areEqual(
+        1,
+        [
+          SELECT COUNT()
+          FROM hed__Relationship__c
+          WHERE hed__Contact__c = :household.parent.Id
+        ],
+        'Resync run as the parent must still grant access to their own relationship'
+      );
+    }
+  }
+
+  private static Integer relationshipShareCount(Id portalUserId) {
+    return [
+      SELECT COUNT()
+      FROM hed__Relationship__Share
+      WHERE UserOrGroupId = :portalUserId AND RowCause = 'Manual'
+    ];
   }
 }

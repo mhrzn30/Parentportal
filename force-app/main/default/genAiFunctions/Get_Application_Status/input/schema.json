@@ -1,0 +1,14 @@
+{
+  "required" : [ "parentContactId" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "parentContactId" : {
+      "title" : "parentContactId",
+      "description" : "The Salesforce Contact ID of the signed-in parent.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

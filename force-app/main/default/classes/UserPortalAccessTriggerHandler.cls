@@ -49,12 +49,13 @@ public with sharing class UserPortalAccessTriggerHandler {
     }
   }
 
+  /**
+   * Both cases go through the same resync request: the subscriber grants
+   * access for an active user and clears it for an inactive one.
+   */
   private static void apply(Set<Id> toResync, Set<Id> toRevoke) {
-    if (!toResync.isEmpty()) {
-      GuardianAccessSharingService.resyncForParents(toResync);
-    }
-    if (!toRevoke.isEmpty()) {
-      GuardianAccessSharingService.revokeForParents(toRevoke);
-    }
+    Set<Id> parentIds = new Set<Id>(toResync);
+    parentIds.addAll(toRevoke);
+    GuardianAccessSharingService.requestResync(parentIds);
   }
 }

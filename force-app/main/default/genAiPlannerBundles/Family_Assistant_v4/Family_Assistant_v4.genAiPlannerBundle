@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPlannerBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Self-serve support agent for parents on the Northbridge Schools parent portal. Helps with applying, lottery and waitlist, documents, and Family Dashboard management.</description>
+    <localTopicLinks>
+        <genAiPluginName>account_dashboard_16jfj00000391O9</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>agent_router_16jfj00000391O9</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>ambiguous_question_16jfj00000391O9</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>application_help_16jfj00000391O9</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>documents_16jfj00000391O9</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>escalation_16jfj00000391O9</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>general_info_16jfj00000391O9</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>lottery_waitlist_16jfj00000391O9</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>off_topic_16jfj00000391O9</genAiPluginName>
+    </localTopicLinks>
+    <localTopics>
+        <fullName>ambiguous_question_16jfj00000391O9</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Redirect conversation to relevant topics when user request is too ambiguous</description>
+        <developerName>ambiguous_question_16jfj00000391O9</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Northbridge Schools Family Assistant, a virtual admissions helper for parents applying to Northbridge charter campuses.
+You help parents understand the application process, check their own family&apos;s application and document status, and find general school information.
+You do not have access to any family&apos;s data except the signed-in parent&apos;s own household.</description>
+            <developerName>instruction0_179fj000004KSFe</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179fj000004KSFe</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>ambiguous_question</localDeveloperName>
+        <masterLabel>Ambiguous Question</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>agent_router_16jfj00000391O9</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Welcome the user and determine the appropriate subagent based on user input</description>
+        <developerName>agent_router_16jfj00000391O9</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Northbridge Schools Family Assistant, a virtual admissions helper for parents applying to Northbridge charter campuses.
+You help parents understand the application process, check their own family&apos;s application and document status, and find general school information.
+You do not have access to any family&apos;s data except the signed-in parent&apos;s own household.
+
+{{state.AgentScriptInternal_agent_instructions}}</description>
+            <developerName>instruction0_179fj000004KSFf</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179fj000004KSFf</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>agent_router</localDeveloperName>
+        <masterLabel>Agent Router</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>escalation_16jfj00000391O9</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Handles requests from parents who want to transfer or escalate their conversation to a live Family Support agent.</description>
+        <developerName>escalation_16jfj00000391O9</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Northbridge Schools Family Assistant, a virtual admissions helper for parents applying to Northbridge charter campuses.
+You help parents understand the application process, check their own family&apos;s application and document status, and find general school information.
+You do not have access to any family&apos;s data except the signed-in parent&apos;s own household.</description>
+            <developerName>instruction0_179fj000004KSFc</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179fj000004KSFc</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>escalation</localDeveloperName>
+        <masterLabel>Escalation</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>account_dashboard_16jfj00000391O9</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Helps parents navigate their Family Dashboard and manage their Northbridge Schools portal account. Can also tell the signed-in parent their own name and list their linked children on request.</description>
+        <developerName>account_dashboard_16jfj00000391O9</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Northbridge Schools Family Assistant, a virtual admissions helper for parents applying to Northbridge charter campuses.
+You help parents understand the application process, check their own family&apos;s application and document status, and find general school information.
+You do not have access to any family&apos;s data except the signed-in parent&apos;s own household.</description>
+            <developerName>instruction0_179fj000004KSFd</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179fj000004KSFd</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localActionLinks>
+            <functionName>Get_Application_Status_179fj000004KSFd</functionName>
+        </localActionLinks>
+        <localActions>
+            <fullName>Get_Application_Status_179fj000004KSFd</fullName>
+            <description>Retrieves the current application status for the signed-in parent, including the student&apos;s name, the school applied to, and the application status.</description>
+            <developerName>Get_Application_Status_179fj000004KSFd</developerName>
+            <invocationTarget>Get_Application_Status</invocationTarget>
+            <invocationTargetType>flow</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>true</isIncludeInProgressIndicator>
+            <localDeveloperName>Get_Application_Status</localDeveloperName>
+            <masterLabel>Get_Application_Status</masterLabel>
+            <progressIndicatorMessage>Looking up your children&apos;s application status…</progressIndicatorMessage>
+            <source>Get_Application_Status</source>
+        </localActions>
+        <localDeveloperName>account_dashboard</localDeveloperName>
+        <masterLabel>Account &amp; Dashboard</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>lottery_waitlist_16jfj00000391O9</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Answers questions about the Northbridge Schools enrollment lottery, waitlist process, and sibling preference. Can also look up the signed-in parent&apos;s application status, student name, school, and current status.</description>
+        <developerName>lottery_waitlist_16jfj00000391O9</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Northbridge Schools Family Assistant, a virtual admissions helper for parents applying to Northbridge charter campuses.
+You help parents understand the application process, check their own family&apos;s application and document status, and find general school information.
+You do not have access to any family&apos;s data except the signed-in parent&apos;s own household.</description>
+            <developerName>instruction0_179fj000004KSFZ</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179fj000004KSFZ</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localActionLinks>
+            <functionName>Get_Application_Status_179fj000004KSFZ</functionName>
+        </localActionLinks>
+        <localActions>
+            <fullName>Get_Application_Status_179fj000004KSFZ</fullName>
+            <description>Retrieves the current application status for the signed-in parent, including the student&apos;s name, the school applied to, and the application status.</description>
+            <developerName>Get_Application_Status_179fj000004KSFZ</developerName>
+            <invocationTarget>Get_Application_Status</invocationTarget>
+            <invocationTargetType>flow</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>true</isIncludeInProgressIndicator>
+            <localDeveloperName>Get_Application_Status</localDeveloperName>
+            <masterLabel>Get_Application_Status</masterLabel>
+            <progressIndicatorMessage>Looking up your children&apos;s application status…</progressIndicatorMessage>
+            <source>Get_Application_Status</source>
+        </localActions>
+        <localDeveloperName>lottery_waitlist</localDeveloperName>
+        <masterLabel>Lottery &amp; Waitlist</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>documents_16jfj00000391O9</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Helps parents understand how to upload and submit required documents for their Northbridge Schools application.</description>
+        <developerName>documents_16jfj00000391O9</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Northbridge Schools Family Assistant, a virtual admissions helper for parents applying to Northbridge charter campuses.
+You help parents understand the application process, check their own family&apos;s application and document status, and find general school information.
+You do not have access to any family&apos;s data except the signed-in parent&apos;s own household.</description>
+            <developerName>instruction0_179fj000004KSFg</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179fj000004KSFg</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>documents</localDeveloperName>
+        <masterLabel>Documents</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>application_help_16jfj00000391O9</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Answers general questions about the Northbridge Schools application process — how to apply, what to expect after submitting, application requirements, and next steps.</description>
+        <developerName>application_help_16jfj00000391O9</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Northbridge Schools Family Assistant, a virtual admissions helper for parents applying to Northbridge charter campuses.
+You help parents understand the application process, check their own family&apos;s application and document status, and find general school information.
+You do not have access to any family&apos;s data except the signed-in parent&apos;s own household.</description>
+            <developerName>instruction0_179fj000004KSFh</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179fj000004KSFh</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>application_help</localDeveloperName>
+        <masterLabel>Application Help</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>off_topic_16jfj00000391O9</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Redirect conversation to relevant topics when user request goes off-topic</description>
+        <developerName>off_topic_16jfj00000391O9</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Northbridge Schools Family Assistant, a virtual admissions helper for parents applying to Northbridge charter campuses.
+You help parents understand the application process, check their own family&apos;s application and document status, and find general school information.
+You do not have access to any family&apos;s data except the signed-in parent&apos;s own household.</description>
+            <developerName>instruction0_179fj000004KSFa</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179fj000004KSFa</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>off_topic</localDeveloperName>
+        <masterLabel>Off Topic</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>general_info_16jfj00000391O9</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Answers general questions about Northbridge Schools — programs, school philosophy, tuition ranges, and scheduling tours — grounded in the knowledge data library. Does not handle account-specific questions or escalations.</description>
+        <developerName>general_info_16jfj00000391O9</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Northbridge Schools Family Assistant, a virtual admissions helper for parents applying to Northbridge charter campuses.
+You help parents understand the application process, check their own family&apos;s application and document status, and find general school information.
+You do not have access to any family&apos;s data except the signed-in parent&apos;s own household.</description>
+            <developerName>instruction0_179fj000004KSFb</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179fj000004KSFb</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>general_info</localDeveloperName>
+        <masterLabel>General Info</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <masterLabel>Family Assistant</masterLabel>
+    <plannerType>Atlas__ConcurrentMultiAgentOrchestration</plannerType>
+</GenAiPlannerBundle>

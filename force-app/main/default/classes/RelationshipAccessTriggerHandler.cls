@@ -49,7 +49,7 @@ public with sharing class RelationshipAccessTriggerHandler {
 
   private static void resync(Set<Id> parentIds) {
     if (!parentIds.isEmpty()) {
-      GuardianAccessSharingService.resyncForParents(parentIds);
+      GuardianAccessSharingService.requestResync(parentIds);
     }
   }
 }

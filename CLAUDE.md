@@ -7,21 +7,41 @@ architecture, conventions, or guardrails change. Do not re-derive anything below
 ## Teaching mode (intern learning this codebase)
 
 The person working in this repo is an intern, learning Salesforce/LWC/Apex as they go.
-When writing code:
+These rules are **strict** and apply to **every** change to any file (code, tests,
+metadata, config, docs). Understanding comes before speed.
 
-- **Small chunks, not whole features.** One function, one component file, or one small
-  related group at a time — not a multi-file feature dropped in one shot.
-- **Explain each chunk as you go, not after.** Before or right after each chunk, briefly
-  cover: what it does, why it's written this way (the reasoning, not just the syntax),
-  how it connects to code already written, and how the next chunk will build on it.
-- **Teach the "why," assume nothing is obvious.** Point out the Salesforce/LWC-specific
-  gotchas (e.g. why a boolean `@api` must default to `false`, why `lightning-formatted-text`
-  is used instead of raw binding, why a jest mock needs `{ virtual: true }`) rather than
-  just writing correct code silently.
-- **Pause between chunks.** Let each piece land and make sense before moving to the next,
-  rather than optimizing for finishing fast.
-- This applies to normal build/feature work. Skip the step-by-step teaching for purely
-  mechanical operations (bulk renames, formatting, config edits) unless asked to slow down.
+**1. Explain in detail BEFORE changing, then ask permission.**
+Before editing any file, describe the planned change in plain language:
+
+- **Which file(s)** and which function/section will change.
+- **What** will change (show the old vs new code, or the new code if it's a new file).
+- **Why** it's needed — the problem it solves or the requirement/scenario it serves.
+- **How it connects** to code that already exists, and what could break.
+
+Then **stop and ask for permission**. Do not edit until the user says yes. If the user
+asks a question or says no, answer/adjust and ask again. Approval covers only the change
+that was described — not the next one.
+
+**2. One small change at a time.**
+One function, one small edit, or one small file per step. Never a multi-file feature in
+one shot. If a task needs several changes, list the steps first, then do them one by one,
+each with its own explain → permission → change → recap cycle.
+
+**3. Recap AFTER every function or small change.**
+Right after each change, explain:
+
+- **What changed** — the exact file and function/lines (use clickable links), in plain words.
+- **Why** it was done this way (the reasoning, not just the syntax), and any alternative
+  that was rejected and why.
+- **Salesforce/LWC/Apex gotchas** involved (e.g. why a boolean `@api` must default to
+  `false`, why `with sharing`, why a jest mock needs `{ virtual: true }`).
+- **What's next** — the next small step and how it builds on this one.
+
+**4. Pause between changes.** Let each piece land and make sense before moving on. Invite
+questions. Never chain several edits silently, even if they seem obvious or mechanical.
+
+**5. Assume nothing is obvious.** Use simple language, define Salesforce terms the first
+time they appear, and avoid unexplained jargon.
 
 ## What this is
 
@@ -103,6 +123,8 @@ A task is done when its scenarios pass and the progress file is updated.
 - Typed input like `<script>` is shown as plain text.
 - Keyboard: Enter sends; bubble, close, and input have accessible labels.
 - Session is ended when the widget is removed.
+- A session without a signed-in parent gets a clear sign-in message, never placeholders or invented data.
+- A parent can't switch to another family's identity mid-conversation.
 
 ## Org
 
@@ -118,7 +140,9 @@ A task is done when its scenarios pass and the progress file is updated.
 - `agent_router` → subagents: general_info, application_help, lottery_waitlist, documents,
   account_dashboard, escalation, off_topic, ambiguous_question.
 - Knowledge grounding: Agentforce Data Library, rag_feature_config_id `ARFPC_1JDfj00000CDDwbGAH`.
-- Action `Get_Application_Status` (Flow): real EDA lookup, bulk-safe (4 queries, none in loops).
+- Action `Get_Application_Status` (Flow → `ApplicationStatusForParent` Apex): real EDA lookup.
+- Source of truth: `force-app/main/default/aiAuthoringBundles/Family_Assistant/`. If anyone edits
+  in Builder, retrieve and diff before deploying.
 - Runs as `EinsteinServiceAgent User` (`005fj00000OO3a2`) with its own permission set.
 - AgentScript `actions:` blocks are per-subagent (no global block). Prefer Canvas mode
   over hand-editing AgentScript for Data Libraries and actions.
@@ -165,12 +189,15 @@ its own FAQ content, dates, or lottery logic.
 ## Identity + sharing design (decided)
 
 - Parent identity resolved server-side in Apex running as the portal user:
-  `UserInfo.getUserId()` → `User.ContactId`, passed as a session context variable.
+  `CurrentParentSelector.contactId()` (`UserInfo.getUserId()` → `User.ContactId`), sent by
+  `startSession()` as the External agent variable `PortalParentContactId` (default `""`).
   The LLM never supplies or chooses a record Id.
 - Agent side: actions run as `EinsteinServiceAgent User`, and the API session runs as the
   integration user, so **portal sharing does not protect agent queries**. Every agent
-  action must filter by the trusted context-variable parentContactId → active
-  Parent/Guardian relationships → those students' applications only.
+  action must filter by `PortalParentContactId` → `RelationshipSelector` → those students'
+  applications only. The agent user serves every household, so it holds read-only View All
+  via `Family_Assistant_Agent_Data_Access` (assigned to that user only); isolation is the
+  action filter, not sharing.
 - Portal side: relationship-driven Apex managed sharing. OWD Private on Contact (not
   "Controlled by Parent") and `hed__Application__c`. `GuardianAccessSharingService`
   (with sharing) `resyncForParents(Set<Id>)` recomputes desired shares and diffs
@@ -178,6 +205,19 @@ its own FAQ content, dates, or lottery logic.
   and `User` (portal user activated after relationship exists).
 - Parent↔child linking must be verified (invite code / admin / match on existing data),
   never self-declared.
+
+## Agent actions (rules for every new action)
+
+- Identity only from `PortalParentContactId`; gate the action with
+  `available when @variables.PortalParentContactId != ""`.
+- Never bind identity or record Ids with `with x = ...`; any Id the model proposes must be in the
+  parent's `RelationshipSelector` set, or the action refuses.
+- Writes set only an explicit allow-list of fields; staff-reserved fields (status, lottery number)
+  are never writable by the agent.
+- The agent drafts; consequential steps (e.g. submitting an application) are confirmed by the
+  parent in the portal, running as the portal user. Low-risk records (e.g. a Case) may be created
+  directly, linked from the server identity.
+- No deletes; cancel/withdraw is a status change.
 
 ## Planned components (reference designs; regenerate in repo, tests first)
 
@@ -200,7 +240,9 @@ its own FAQ content, dates, or lottery logic.
 - Errors show fallback + Family Support contact; never blank panel or endless spinner.
 - No production data deletes outside the sharing-row diff logic.
 - Follow existing repo ESLint/Prettier and naming conventions.
-- Least privilege for `EinsteinServiceAgent User` and the integration user.
+- Least privilege for `EinsteinServiceAgent User` and the integration user. Deliberate exception:
+  read-only View All on family objects for the agent user (see Identity design). Never add View All
+  to a permission set that portal parents hold.
 
 ## Known gotchas
 
@@ -244,24 +286,16 @@ its own FAQ content, dates, or lottery logic.
   `GuardianAccessSharingService` create direct `ContactShare` rows — `hed__Application__c`'s
   *external* sharing model was already `Private` (distinct from its internal `ReadWrite`), so it
   didn't need changing; `hed__Application__Share` rows already work under it.
+- `sObject type 'X' is not supported` from Apex/Flow usually means the running user has no access to
+  that object or Custom Metadata Type (check the permission set before the spelling).
+- Agent API `InternalVariableMutationAttemptException` = the variable isn't API-writable; needs
+  AgentScript `visibility: "External"` (Builder "Enable API write access"). Toggling it in Builder
+  dropped our `= ""` default — check after any retrieve.
+- AgentScript `with x = ...` = the model fills `x` from the conversation (the cause of the old
+  `invalid ID field: current` error).
+- `sf agent publish` rejects an action output missing from the action's saved schema; `sf agent
+  validate` doesn't check this, and the schema doesn't refresh when the flow gains outputs.
+- A subagent's `description` also drives routing; removing a topic from it re-routes those questions.
 
-## Test data
-
-Household 1 (Maharjan): parent Contact `003fj00001jtXAbAAM`, student `003fj00001jtXAcAAM`,
-2 applications (different schools/statuses). No second household yet.
-
-## Open items (in order)
-
-1. ~~Confirm portal license type (gates sharing approach).~~ Done — Customer Community Plus.
-2. Replace hardcoded `DevContactId` in the two subagents with the real session context variable
-   set by `startSession()`.
-3. ~~Create a second household; test-first cross-household isolation (portal + agent).~~ Done —
-   `RelationshipSelectorTest`/`GuardianAccessSharingServiceTest` cover this via
-   `System.runAs(portalUser)` with two households.
-4. ~~Build `GuardianAccessSharingService` + triggers, tests first.~~ Done — see progress file.
-5. Build `FamilyAssistantAgentController` + `familyAssistantChat` with tests; App Page, then portal.
-   (Controller/LWC done per progress file; still needs an App Page and Experience Cloud rollout.)
-6. Verified add-child flow, parent profile view/edit, document upload.
-7. Least-privilege review of `EinsteinServiceAgent User` permission set.
-8. Republish the Experience site once one exists (LWR serves a published snapshot) — not yet
-   applicable; no site/digital experience has been created yet in this repo.
+Test data and the open-items checklist now live in `docs/family-assistant-agent-progress.md`
+(they're live status, not architecture/conventions/guardrails).

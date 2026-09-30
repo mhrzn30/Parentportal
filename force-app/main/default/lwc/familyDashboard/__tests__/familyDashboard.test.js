@@ -113,4 +113,49 @@ describe("c-family-dashboard", () => {
 
     expect(element.shadowRoot.querySelector(".dashboard__add")).toBeNull();
   });
+
+  it("offersTheFamilyAssistantOnTheDashboard", async () => {
+    const element = createElement("c-family-dashboard", {
+      is: FamilyDashboard
+    });
+    document.body.appendChild(element);
+    await flushPromises();
+
+    expect(
+      element.shadowRoot.querySelector("c-family-assistant-chat")
+    ).not.toBeNull();
+  });
+
+  it("keepsTheSameFamilyAssistantWhenSwitchingToChildDetail", async () => {
+    const element = createElement("c-family-dashboard", {
+      is: FamilyDashboard
+    });
+    document.body.appendChild(element);
+    await flushPromises();
+
+    const chatBefore = element.shadowRoot.querySelector(
+      "c-family-assistant-chat"
+    );
+    element.shadowRoot
+      .querySelector("c-children-grid")
+      .dispatchEvent(
+        new CustomEvent("childselect", { detail: { childId: "chd-a1" } })
+      );
+    await flushPromises();
+
+    expect(element.shadowRoot.querySelector("c-family-assistant-chat")).toBe(
+      chatBefore
+    );
+  });
+
+  it("hidesTheFamilyAssistantWhenConfiguredToDoSo", async () => {
+    const element = createElement("c-family-dashboard", {
+      is: FamilyDashboard
+    });
+    element.hideChat = true;
+    document.body.appendChild(element);
+    await flushPromises();
+
+    expect(element.shadowRoot.querySelector("c-family-assistant-chat")).toBeNull();
+  });
 });

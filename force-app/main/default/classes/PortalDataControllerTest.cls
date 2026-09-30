@@ -89,4 +89,59 @@ private class PortalDataControllerTest {
       'Requesting another household\'s child by id must resolve to nothing, not an error'
     );
   }
+
+  /**
+   * End to end as a real portal parent: getChildren() resolves the parent
+   * from UserInfo, reads Relationship_Type_Setting__mdt without a mock, and
+   * queries relationships/children/applications under the parent's own
+   * sharing. Catches a missing permission or a missing share row that the
+   * seam-based tests above can't see.
+   */
+  @isTest
+  static void portalParentSeesOnlyOwnLinkedChildrenThroughGetChildren() {
+    TestDataFactory.Household householdA = TestDataFactory.createHousehold(
+      'Adeyemi',
+      'Daughter'
+    );
+    TestDataFactory.Household householdB = TestDataFactory.createHousehold(
+      'Lindgren',
+      'Son'
+    );
+    Account school = TestDataFactory.createSchool('Riverside Primary');
+    TestDataFactory.createApplication(
+      householdA.student.Id,
+      school.Id,
+      'In Review'
+    );
+    TestDataFactory.createApplication(
+      householdB.student.Id,
+      school.Id,
+      'Waitlisted'
+    );
+    User portalUserA = TestDataFactory.createPortalUser(householdA.parent);
+    TestDataFactory.createPortalUser(householdB.parent);
+    GuardianAccessSharingService.resyncForParents(
+      new Set<Id>{ householdA.parent.Id, householdB.parent.Id }
+    );
+
+    List<PortalDataController.ChildWrapper> children;
+    Test.startTest();
+    System.runAs(portalUserA) {
+      children = PortalDataController.getChildren();
+    }
+    Test.stopTest();
+
+    Assert.areEqual(
+      1,
+      children.size(),
+      'A signed-in parent must see exactly their own linked child'
+    );
+    Assert.areEqual(householdA.student.Id, children[0].id);
+    Assert.areEqual(
+      1,
+      children[0].applications.size(),
+      'The parent must see their child\'s application'
+    );
+    Assert.areEqual('In Review', children[0].applications[0].status.label);
+  }
 }

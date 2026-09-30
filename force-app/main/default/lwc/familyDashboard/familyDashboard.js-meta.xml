@@ -28,6 +28,13 @@
         default="false"
         label="Hide the Add a child button"
       />
+            <property
+        name="hideChat"
+        type="Boolean"
+        default="false"
+        label="Hide the Family Assistant chat"
+        description="Turn on if the Family Assistant chat is already placed separately on this page."
+      />
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

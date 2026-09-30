@@ -23,25 +23,26 @@
 public inherited sharing class RelationshipSelector {
   /** parentContactId -> the set of child Contact ids that parent currently has access to. */
   public static Map<Id, Set<Id>> childIdsForParents(Set<Id> parentContactIds) {
+    return childIdsForParents(parentContactIds, AccessLevel.USER_MODE);
+  }
+
+  /**
+   * Same, with an explicit access mode. Only GuardianAccessSharingService
+   * passes SYSTEM_MODE, so its share computation doesn't depend on who
+   * triggered it; everything that returns data to a person uses the
+   * USER_MODE overload above.
+   */
+  public static Map<Id, Set<Id>> childIdsForParents(
+    Set<Id> parentContactIds,
+    AccessLevel mode
+  ) {
     Map<Id, Set<Id>> result = new Map<Id, Set<Id>>();
-    if (parentContactIds == null || parentContactIds.isEmpty()) {
-      return result;
-    }
-
-    Set<String> accessGrantingTypes = RelationshipTypeSettings.accessGrantingChildTypes();
-    if (accessGrantingTypes.isEmpty()) {
-      return result;
-    }
-
-    for (hed__Relationship__c relationship : [
-      SELECT hed__Contact__c, hed__RelatedContact__c
-      FROM hed__Relationship__c
-      WHERE
-        hed__Contact__c IN :parentContactIds
-        AND hed__Type__c IN :accessGrantingTypes
-        AND hed__Status__c = 'Current'
-      WITH USER_MODE
-    ]) {
+    for (
+      hed__Relationship__c relationship : accessGrantingRelationshipsForParents(
+        parentContactIds,
+        mode
+      )
+    ) {
       if (!result.containsKey(relationship.hed__Contact__c)) {
         result.put(relationship.hed__Contact__c, new Set<Id>());
       }
@@ -51,8 +52,68 @@ public inherited sharing class RelationshipSelector {
     return result;
   }
 
+  /**
+   * parentContactId -> the Ids of that parent's own access-granting
+   * relationship rows. GuardianAccessSharingService shares these rows to the
+   * parent, because the portal reads children *through* them as the parent.
+   */
+  public static Map<Id, Set<Id>> relationshipIdsForParents(
+    Set<Id> parentContactIds,
+    AccessLevel mode
+  ) {
+    Map<Id, Set<Id>> result = new Map<Id, Set<Id>>();
+    for (
+      hed__Relationship__c relationship : accessGrantingRelationshipsForParents(
+        parentContactIds,
+        mode
+      )
+    ) {
+      if (!result.containsKey(relationship.hed__Contact__c)) {
+        result.put(relationship.hed__Contact__c, new Set<Id>());
+      }
+      result.get(relationship.hed__Contact__c).add(relationship.Id);
+    }
+    return result;
+  }
+
+  /** The one query that encodes the parent-side access rule. */
+  private static List<hed__Relationship__c> accessGrantingRelationshipsForParents(
+    Set<Id> parentContactIds,
+    AccessLevel mode
+  ) {
+    if (parentContactIds == null || parentContactIds.isEmpty()) {
+      return new List<hed__Relationship__c>();
+    }
+
+    Set<String> accessGrantingTypes = RelationshipTypeSettings.accessGrantingChildTypes();
+    if (accessGrantingTypes.isEmpty()) {
+      return new List<hed__Relationship__c>();
+    }
+
+    return Database.queryWithBinds(
+      'SELECT Id, hed__Contact__c, hed__RelatedContact__c' +
+        ' FROM hed__Relationship__c' +
+        ' WHERE hed__Contact__c IN :parentContactIds' +
+        ' AND hed__Type__c IN :accessGrantingTypes' +
+        ' AND hed__Status__c = \'Current\'',
+      new Map<String, Object>{
+        'parentContactIds' => parentContactIds,
+        'accessGrantingTypes' => accessGrantingTypes
+      },
+      mode
+    );
+  }
+
   /** The set of parent Contact ids who currently have access to any of the given children. */
   public static Set<Id> parentIdsForChildren(Set<Id> childContactIds) {
+    return parentIdsForChildren(childContactIds, AccessLevel.USER_MODE);
+  }
+
+  /** Same, with an explicit access mode -- see childIdsForParents(Set<Id>, AccessLevel). */
+  public static Set<Id> parentIdsForChildren(
+    Set<Id> childContactIds,
+    AccessLevel mode
+  ) {
     Set<Id> result = new Set<Id>();
     if (childContactIds == null || childContactIds.isEmpty()) {
       return result;
@@ -63,15 +124,19 @@ public inherited sharing class RelationshipSelector {
       return result;
     }
 
-    for (hed__Relationship__c relationship : [
-      SELECT hed__Contact__c
-      FROM hed__Relationship__c
-      WHERE
-        hed__RelatedContact__c IN :childContactIds
-        AND hed__Type__c IN :accessGrantingTypes
-        AND hed__Status__c = 'Current'
-      WITH USER_MODE
-    ]) {
+    List<hed__Relationship__c> relationships = Database.queryWithBinds(
+      'SELECT hed__Contact__c' +
+        ' FROM hed__Relationship__c' +
+        ' WHERE hed__RelatedContact__c IN :childContactIds' +
+        ' AND hed__Type__c IN :accessGrantingTypes' +
+        ' AND hed__Status__c = \'Current\'',
+      new Map<String, Object>{
+        'childContactIds' => childContactIds,
+        'accessGrantingTypes' => accessGrantingTypes
+      },
+      mode
+    );
+    for (hed__Relationship__c relationship : relationships) {
       result.add(relationship.hed__Contact__c);
     }
     return result;
