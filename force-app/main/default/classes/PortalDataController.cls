@@ -66,7 +66,7 @@ public with sharing class PortalDataController {
   /** The signed-in parent's linked children (without needing a child id). */
   @AuraEnabled(cacheable=true)
   public static List<ChildWrapper> getChildren() {
-    return getChildrenForParent(currentParentContactId());
+    return getChildrenForParent(CurrentParentSelector.contactId());
   }
 
   /**
@@ -125,7 +125,7 @@ public with sharing class PortalDataController {
    */
   @AuraEnabled(cacheable=true)
   public static ChildWrapper getChild(Id childId) {
-    return getChildForParent(currentParentContactId(), childId);
+    return getChildForParent(CurrentParentSelector.contactId(), childId);
   }
 
   /** Test seam -- see getChildrenForParent(). */
@@ -161,15 +161,6 @@ public with sharing class PortalDataController {
         .get(childId),
       applicationsByStudentId(new Set<Id>{ childId }).get(childId)
     );
-  }
-
-  private static Id currentParentContactId() {
-    List<User> runningUser = [
-      SELECT ContactId
-      FROM User
-      WHERE Id = :UserInfo.getUserId()
-    ];
-    return runningUser.isEmpty() ? null : runningUser[0].ContactId;
   }
 
   /**
