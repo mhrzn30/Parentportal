@@ -7,6 +7,9 @@ public with sharing class FamilyAssistantAgentController {
   private static final String NAMED_CREDENTIAL = 'callout:Family_Assistant_Agent_API';
   // TODO: move to a Custom Metadata Type before this goes past the dev org (see docs/family-assistant-agent-progress.md)
   private static final String AGENT_ID = '0Xxfj000003t47hCAA';
+  // Must match the External variable in Family_Assistant.agent exactly.
+  private static final String PARENT_IDENTITY_VARIABLE = 'PortalParentContactId';
+  private static final String PARENT_FIRST_NAME_VARIABLE = 'PortalParentFirstName';
   private static final Integer TIMEOUT_MS = 20000;
   private static final String GENERIC_ERROR = 'The Family Assistant is unavailable right now.';
 
@@ -29,6 +32,20 @@ public with sharing class FamilyAssistantAgentController {
       },
       'bypassUser' => true
     };
+
+    Id parentContactId = CurrentParentSelector.contactId();
+    if (parentContactId != null) {
+      requestBody.put(
+        'variables',
+        new List<Object>{
+          sessionVariable(
+            PARENT_IDENTITY_VARIABLE,
+            String.valueOf(parentContactId)
+          ),
+          sessionVariable(PARENT_FIRST_NAME_VARIABLE, UserInfo.getFirstName())
+        }
+      );
+    }
 
     Map<String, Object> responseBody = sendCallout(
       'POST',
@@ -83,6 +100,17 @@ public with sharing class FamilyAssistantAgentController {
     } catch (Exception e) {
       // Best-effort cleanup only; the user has already closed the panel.
     }
+  }
+
+  private static Map<String, Object> sessionVariable(
+    String name,
+    String value
+  ) {
+    return new Map<String, Object>{
+      'name' => name,
+      'type' => 'Text',
+      'value' => value
+    };
   }
 
   private static Map<String, Object> sendCallout(

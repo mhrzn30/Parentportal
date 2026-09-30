@@ -61,6 +61,41 @@ private class FamilyAssistantAgentControllerTest {
     }
   }
 
+  private class CapturingMock implements HttpCalloutMock {
+    public String capturedBody;
+    public HttpResponse respond(HttpRequest req) {
+      capturedBody = req.getBody();
+      HttpResponse res = new HttpResponse();
+      res.setStatusCode(200);
+      res.setBody(
+        '{"sessionId":"session-123","messages":[' +
+          '{"type":"Inform","message":"Hi, I\'m Family Assistant.","isContentSafe":true}' +
+          ']}'
+      );
+      return res;
+    }
+  }
+
+  private static Map<String, Object> sessionVariable(
+    String requestBody,
+    String name
+  ) {
+    Map<String, Object> body = (Map<String, Object>) JSON.deserializeUntyped(
+      requestBody
+    );
+    List<Object> variables = (List<Object>) body.get('variables');
+    if (variables == null) {
+      return null;
+    }
+    for (Object rawVariable : variables) {
+      Map<String, Object> variable = (Map<String, Object>) rawVariable;
+      if (variable.get('name') == name) {
+        return variable;
+      }
+    }
+    return null;
+  }
+
   @isTest
   static void startSessionReturnsSessionIdAndSafeReplies() {
     Test.setMock(HttpCalloutMock.class, new SessionOpenMock());
@@ -131,5 +166,124 @@ private class FamilyAssistantAgentControllerTest {
     Test.startTest();
     FamilyAssistantAgentController.endSession('session-123');
     Test.stopTest();
+  }
+
+  @isTest
+  static void portalParentSessionSendsOwnContactId() {
+    TestDataFactory.Household householdA = TestDataFactory.createHousehold(
+      'Adeyemi'
+    );
+    TestDataFactory.Household householdB = TestDataFactory.createHousehold(
+      'Lindgren'
+    );
+    User portalUserA = TestDataFactory.createPortalUser(householdA.parent);
+    TestDataFactory.createPortalUser(householdB.parent);
+    CapturingMock mock = new CapturingMock();
+    Test.setMock(HttpCalloutMock.class, mock);
+
+    Test.startTest();
+    System.runAs(portalUserA) {
+      FamilyAssistantAgentController.startSession();
+    }
+    Test.stopTest();
+
+    Map<String, Object> identity = sessionVariable(
+      mock.capturedBody,
+      'PortalParentContactId'
+    );
+    System.assertNotEquals(
+      null,
+      identity,
+      'The session must carry the signed-in parent\'s identity'
+    );
+    System.assertEquals('Text', identity.get('type'));
+    System.assertEquals(
+      String.valueOf(householdA.parent.Id),
+      identity.get('value'),
+      'The session must carry the signed-in parent\'s own Contact Id'
+    );
+    System.assert(
+      !mock.capturedBody.contains(householdB.parent.Id),
+      'Another household\'s parent must never appear in the session'
+    );
+  }
+
+  @isTest
+  static void userWithoutContactSendsNoParentIdentity() {
+    CapturingMock mock = new CapturingMock();
+    Test.setMock(HttpCalloutMock.class, mock);
+
+    Test.startTest();
+    FamilyAssistantAgentController.startSession();
+    Test.stopTest();
+
+    System.assertEquals(
+      null,
+      sessionVariable(mock.capturedBody, 'PortalParentContactId'),
+      'A user with no Contact must get an FAQ-only session with no parent identity'
+    );
+    System.assertEquals(
+      null,
+      sessionVariable(mock.capturedBody, 'PortalParentFirstName'),
+      'A user with no Contact must not be greeted by name'
+    );
+  }
+
+  @isTest
+  static void portalParentSessionSendsOwnFirstName() {
+    TestDataFactory.Household householdA = TestDataFactory.createHousehold(
+      'Adeyemi'
+    );
+    TestDataFactory.Household householdB = TestDataFactory.createHousehold(
+      'Lindgren'
+    );
+    User portalUserA = TestDataFactory.createPortalUser(householdA.parent);
+    TestDataFactory.createPortalUser(householdB.parent);
+    CapturingMock mock = new CapturingMock();
+    Test.setMock(HttpCalloutMock.class, mock);
+
+    Test.startTest();
+    System.runAs(portalUserA) {
+      FamilyAssistantAgentController.startSession();
+    }
+    Test.stopTest();
+
+    Map<String, Object> firstName = sessionVariable(
+      mock.capturedBody,
+      'PortalParentFirstName'
+    );
+    System.assertNotEquals(
+      null,
+      firstName,
+      'The session must carry the signed-in parent\'s first name'
+    );
+    System.assertEquals('Text', firstName.get('type'));
+    System.assertEquals(portalUserA.FirstName, firstName.get('value'));
+    System.assert(
+      !mock.capturedBody.contains('Lindgren'),
+      'Another household\'s name must never appear in the session'
+    );
+  }
+
+  @isTest
+  static void sendMessageNeverSendsVariables() {
+    CapturingMock mock = new CapturingMock();
+    Test.setMock(HttpCalloutMock.class, mock);
+
+    Test.startTest();
+    FamilyAssistantAgentController.sendMessage(
+      'session-123',
+      1,
+      'What is my child\'s status?'
+    );
+    Test.stopTest();
+
+    Map<String, Object> body = (Map<String, Object>) JSON.deserializeUntyped(
+      mock.capturedBody
+    );
+    System.assert(
+      !body.containsKey('variables'),
+      'sendMessage must never send variables, so identity cannot change mid-session'
+    );
   }
 }
