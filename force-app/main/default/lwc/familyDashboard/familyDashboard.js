@@ -8,9 +8,14 @@ const VIEW = {
 export default class FamilyDashboard extends LightningElement {
   @api headingText = "Your children";
   @api hideAddChild = false;
+  @api hideChat = false;
 
   get showAddChild() {
     return !this.hideAddChild;
+  }
+
+  get showChat() {
+    return !this.hideChat;
   }
 
   currentView = VIEW.GRID;
