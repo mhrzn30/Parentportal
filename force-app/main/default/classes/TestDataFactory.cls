@@ -154,13 +154,18 @@ public class TestDataFactory {
   }
 
   /**
-   * A Customer Community Plus portal User linked to a parent Contact via
+   * A Customer Community Plus Login portal User linked to a parent Contact via
    * ContactId (only portal/community license types allow setting
    * ContactId at all -- confirmed empirically; it's rejected outright for
    * internal users). Used by GuardianAccessSharingServiceTest and the
    * trigger handler tests to prove real portal-user visibility end to end
    * via System.runAs(), now that GuardianAccessSharingService and Private
    * Contact OWD exist.
+   *
+   * Uses the same profile and permission set real parents get in the org
+   * (Family Portal Parent / Family_Portal_Parent), so a test's runAs user has
+   * exactly a real parent's object, field, and custom metadata access -- a
+   * missing permission fails here instead of in the portal.
    */
   public static User createPortalUser(Contact parent) {
     return createPortalUser(parent, true);
@@ -190,7 +195,7 @@ public class TestDataFactory {
       portalUser.ProfileId = [
         SELECT Id
         FROM Profile
-        WHERE Name = 'Customer Community Plus User'
+        WHERE Name = 'Family Portal Parent'
         LIMIT 1
       ]
       .Id;
@@ -199,7 +204,7 @@ public class TestDataFactory {
       Id permissionSetId = [
         SELECT Id
         FROM PermissionSet
-        WHERE Name = 'Family_Portal_Data_Access'
+        WHERE Name = 'Family_Portal_Parent'
         LIMIT 1
       ]
       .Id;
