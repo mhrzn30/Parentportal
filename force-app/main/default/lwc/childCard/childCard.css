@@ -1,30 +1,65 @@
+@import "c/portalTokens";
+
 .child-card {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 18px;
-  border: 1px solid var(--app-line, #e3e6ea);
-  border-radius: 12px;
-  background: var(--app-panel, #ffffff);
+  gap: var(--app-space-3);
+  padding: var(--app-space-5);
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-md);
+  background: var(--app-color-surface);
   list-style: none;
 }
 
+.child-card:hover {
+  box-shadow: var(--app-shadow-sm);
+}
+
 .child-card:focus-within {
-  outline: 2px solid var(--app-orange-dark, #da7a08);
+  outline: 2px solid var(--app-color-focus);
   outline-offset: 2px;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .child-card {
+    transition:
+      transform var(--app-motion-fast) var(--app-motion-ease),
+      box-shadow var(--app-motion-fast) var(--app-motion-ease);
+  }
+
+  .child-card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.child-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-3);
+}
+
 .child-card__avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--app-page, #f7f8fa);
+  background: var(--app-color-accent-subtle);
+  color: var(--app-color-accent-text);
+  font-size: var(--app-font-size-sm);
+  font-weight: 700;
+}
+
+.child-card__identity {
+  min-width: 0;
 }
 
 .child-card__name {
   margin: 0;
-  font-size: 16px;
+  font-size: var(--app-font-size-lg);
 }
 
 .child-card__action {
@@ -33,11 +68,12 @@
   background: none;
   font: inherit;
   font-weight: 700;
-  color: var(--app-ink, #1a1a1a);
+  color: var(--app-color-text);
   cursor: pointer;
   text-align: left;
 }
 
+/* Stretches the name button over the whole card, so the card is one click target. */
 .child-card__action::after {
   content: "";
   position: absolute;
@@ -49,16 +85,26 @@
 }
 
 .child-card__meta {
-  margin: 0;
-  color: var(--app-muted, #5f6368);
-  font-size: 13px;
+  margin: var(--app-space-1) 0 0;
+  color: var(--app-color-text-muted);
+  font-size: var(--app-font-size-sm);
 }
 
 .child-card__badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin: 4px 0 0;
-  padding: 0;
+  gap: var(--app-space-2);
+  margin: 0;
+  padding: var(--app-space-3) 0 0;
+  border-top: 1px solid var(--app-color-border);
   list-style: none;
+}
+
+/* margin-top: auto pins the link to the bottom so cards in a row line up. */
+.child-card__cta {
+  align-self: flex-end;
+  margin-top: auto;
+  color: var(--app-color-accent-text);
+  font-size: var(--app-font-size-sm);
+  font-weight: 700;
 }

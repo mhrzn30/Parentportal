@@ -1,12 +1,20 @@
 <template>
   <li class="child-card notranslate">
-    <span class="child-card__avatar" aria-hidden="true"></span>
-    <h3 class="child-card__name">
-      <button class="child-card__action" type="button" onclick={handleActivate}>
-        {displayName}
-      </button>
-    </h3>
-    <p class="child-card__meta">{metaText}</p>
+    <div class="child-card__header">
+      <span class="child-card__avatar" aria-hidden="true">{initials}</span>
+      <div class="child-card__identity">
+        <h3 class="child-card__name">
+          <button
+            class="child-card__action"
+            type="button"
+            onclick={handleActivate}
+          >
+            {displayName}
+          </button>
+        </h3>
+        <p lwc:if={metaText} class="child-card__meta">{metaText}</p>
+      </div>
+    </div>
     <ul lwc:if={hasApplications} class="child-card__badges">
       <template for:each={applications} for:item="app">
         <li key={app.id}>
@@ -14,5 +22,6 @@
         </li>
       </template>
     </ul>
+    <span class="child-card__cta" aria-hidden="true">View &rarr;</span>
   </li>
 </template>

@@ -1,31 +1,58 @@
+@import "c/portalTokens";
+
 .detail__back {
-  padding: 6px 0;
+  margin-bottom: var(--app-space-3);
+  padding: var(--app-space-2) 0;
   border: 0;
   background: none;
-  color: var(--app-orange-dark, #da7a08);
+  color: var(--app-color-accent-text);
   font: inherit;
   font-weight: 700;
   cursor: pointer;
 }
 
+.detail__back:focus-visible {
+  outline: 2px solid var(--app-color-focus);
+  outline-offset: 2px;
+}
+
+.detail__panel {
+  padding: var(--app-space-6);
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-radius-md);
+  background: var(--app-color-surface);
+  box-shadow: var(--app-shadow-sm);
+}
+
 .detail__name {
-  margin: 12px 0 8px;
+  margin: 0 0 var(--app-space-4);
+  font-size: var(--app-font-size-xl);
 }
 
 .detail__facts {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: 4px 16px;
-  margin: 0 0 20px;
+  gap: var(--app-space-2) var(--app-space-4);
+  margin: 0 0 var(--app-space-6);
 }
 
 .detail__facts dt {
-  color: var(--app-muted, #5f6368);
-  font-size: 13px;
+  color: var(--app-color-text-muted);
+  font-size: var(--app-font-size-sm);
 }
 
 .detail__facts dd {
   margin: 0;
+}
+
+.detail__section-title {
+  margin: 0 0 var(--app-space-3);
+  font-size: var(--app-font-size-lg);
+}
+
+/* Lets the table scroll sideways on phones instead of squashing or overflowing the page. */
+.detail__table-wrap {
+  overflow-x: auto;
 }
 
 .detail__table {
@@ -35,15 +62,26 @@
 
 .detail__table th,
 .detail__table td {
-  padding: 8px;
-  border-bottom: 1px solid var(--app-line, #e3e6ea);
+  padding: var(--app-space-3);
+  border-bottom: 1px solid var(--app-color-border);
   text-align: left;
 }
 
+.detail__table th {
+  background: var(--app-color-background);
+  color: var(--app-color-text-muted);
+  font-size: var(--app-font-size-sm);
+  white-space: nowrap;
+}
+
+.detail__table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
 .state-message {
-  padding: 24px;
-  border-radius: 12px;
-  background: #fdeceb;
+  padding: var(--app-space-6);
+  border-radius: var(--app-radius-md);
+  background: var(--app-color-error-bg);
 }
 
 .sr-only {

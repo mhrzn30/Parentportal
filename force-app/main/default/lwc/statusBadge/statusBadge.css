@@ -1,39 +1,48 @@
+@import "c/portalTokens";
+
 .status-badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font-size: 12px;
+  gap: var(--app-space-2);
+  padding: var(--app-space-1) var(--app-space-3);
+  border-radius: var(--app-radius-pill);
+  font-size: var(--app-font-size-xs);
   font-weight: 700;
   white-space: nowrap;
 }
 
+/* Status dot in the badge's own text colour, so it always matches the status. */
+.status-badge::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
 .status-badge--waitlisted {
-  background: #fdeed7;
-  color: #7a4a04;
+  background: var(--app-color-status-warning-bg);
+  color: var(--app-color-status-warning-text);
 }
 
-.status-badge--in_review {
-  background: #dceafe;
-  color: #1c4a8f;
-}
-
+.status-badge--in_review,
 .status-badge--submitted {
-  background: #dceafe;
-  color: #1c4a8f;
+  background: var(--app-color-status-info-bg);
+  color: var(--app-color-status-info-text);
 }
 
 .status-badge--offered,
 .status-badge--enrolled {
-  background: #dcf3e2;
-  color: #1a6b34;
+  background: var(--app-color-status-success-bg);
+  color: var(--app-color-status-success-text);
 }
 
 .status-badge--declined,
 .status-badge--withdrawn,
 .status-badge--unknown {
-  background: #eceef1;
-  color: #3d4247;
+  background: var(--app-color-status-neutral-bg);
+  color: var(--app-color-status-neutral-text);
 }
 
 .sr-only {
