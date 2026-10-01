@@ -43,6 +43,21 @@ Separate from the agent work above: a parent-facing dashboard UI, now wired to r
 - [ ] Not yet placed on a Lightning App Page/FlexiPage for browser click-through (no `flexipages`/`applications` exist yet — this is the actual next surface, not Experience Cloud).
 - [x] **Real Experience Cloud portal-user access now works** — `GuardianAccessSharingService` (Apex managed sharing) built; see the section below. Open item 4 done.
 - [ ] Support contact / agent id are still hardcoded in `familyAssistantChat.js` — belongs in Custom Metadata Type, not fixed in this pass.
+- [x] 2026-09-30: Dashboard redesign ("Welcome + soft cards"). New CSS-only `c/portalTokens` module
+  (palette → role `--app-color-*` → scales for space/radius/shadow/rem type/motion) imported by
+  `familyDashboard`, `childCard`, `childrenGrid`, `statusBadge`, `childDetail`, `addChildDialog`; old
+  `--app-*` names and hex fallbacks removed. Welcome banner shows the signed-in user's full name
+  (`getRecord` on `User.Name`; "Welcome" while loading, on error, or for guests). Cards get initials
+  avatar, divider, "View →"; badges get a status dot; detail view is a card with a scrollable table.
+  `jest.config.js` maps `c/portalTokens` (CSS-only modules have no `.js` for the lwc-jest resolver).
+  40 Jest tests / 9 suites passing.
+- [x] 2026-09-30: `familyAssistantChat` moved off its own `--ppc-*` palette onto `c/portalTokens`
+  (layout unchanged). Accessibility fixes: chip text/border use `--app-color-accent-text`; input
+  border uses new `--app-color-border-strong` `#8a9099` (old `#b8bdc5` ~1.9:1 failed WCAG 1.4.11);
+  solid focus ring. New `--app-z-overlay` shared with `addChildDialog`. Deployed (`0Affj00000TFziPCAT`).
+- [ ] Contact name edits don't update `User.Name`; the future profile-edit feature must update both
+  (banner + agent greeting read the User).
+- [ ] Pre-existing Prettier failures in `jest.config.js` and `familyDashboard.test.js` (not from this change).
 
 ## Relationship-Type Access & Guardian Sharing
 Which `hed__Relationship__c` types grant a parent access to a child, and the real Apex-managed sharing that acts on that classification.
@@ -185,3 +200,10 @@ the Postman External-variable test). No two-child household yet — needed to ve
   not with "don't guess" wording — the platform controls what the model sees; instructions are hints.
 - Released agent v3 without the `childrenNames` output declaration rather than blocking the placeholder
   fix on an unrelated action-schema refresh.
+- Dashboard greeting reads the login User's `Name` via LDS `getRecord`, not a new Apex method on the
+  Contact: no query or sharing risk (a user can always read their own User), and it matches the agent's
+  `UserInfo.getFirstName()`, so the User record is the single source of display names. An Apex
+  `getCurrentParent()` plus tests was drafted and then removed before deploy.
+- Design tokens live in a shared CSS-only module (`c/portalTokens`), not on the dashboard's `:host`, so
+  standalone components get the same values. Added `--app-color-accent-text` `#a35a00` because the old
+  `#da7a08` used as text was ~3.1:1 on white (fails WCAG AA 4.5:1); `#da7a08` stays as the hover fill.
