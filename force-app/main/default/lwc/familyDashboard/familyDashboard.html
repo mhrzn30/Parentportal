@@ -1,7 +1,12 @@
 <template>
   <section class="dashboard">
-    <div class="dashboard__header">
-      <h2>{headingText}</h2>
+    <div class="dashboard__banner">
+      <div class="dashboard__banner-text">
+        <p class="dashboard__welcome">{welcomeText}</p>
+        <p class="dashboard__subtitle">
+          Here's how your family's applications are going.
+        </p>
+      </div>
       <button
         lwc:if={showAddChild}
         type="button"
@@ -11,6 +16,8 @@
         Add a child
       </button>
     </div>
+
+    <h2 class="dashboard__heading">{headingText}</h2>
 
     <c-children-grid
       lwc:if={isGridView}

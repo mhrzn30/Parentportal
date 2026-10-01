@@ -1,6 +1,7 @@
 import { createElement } from "lwc";
 import FamilyDashboard from "c/familyDashboard";
 import { getChildren, getChild } from "c/portalDataService";
+import { getRecord } from "lightning/uiRecordApi";
 
 jest.mock("c/portalDataService", () => ({
   getChildren: jest.fn(),
@@ -157,5 +158,43 @@ describe("c-family-dashboard", () => {
     await flushPromises();
 
     expect(element.shadowRoot.querySelector("c-family-assistant-chat")).toBeNull();
+  });
+
+  it("welcomesTheSignedInParentByFullName", async () => {
+    const element = createElement("c-family-dashboard", {
+      is: FamilyDashboard
+    });
+    document.body.appendChild(element);
+    getRecord.emit({ fields: { Name: { value: "Priya Adeyemi" } } });
+    await flushPromises();
+
+    expect(
+      element.shadowRoot.querySelector(".dashboard__welcome").textContent
+    ).toBe("Welcome, Priya Adeyemi");
+  });
+
+  it("showsAPlainWelcomeWhileTheNameIsLoading", async () => {
+    const element = createElement("c-family-dashboard", {
+      is: FamilyDashboard
+    });
+    document.body.appendChild(element);
+    await flushPromises();
+
+    expect(
+      element.shadowRoot.querySelector(".dashboard__welcome").textContent
+    ).toBe("Welcome");
+  });
+
+  it("showsAPlainWelcomeWhenTheNameCannotBeLoaded", async () => {
+    const element = createElement("c-family-dashboard", {
+      is: FamilyDashboard
+    });
+    document.body.appendChild(element);
+    getRecord.error();
+    await flushPromises();
+
+    expect(
+      element.shadowRoot.querySelector(".dashboard__welcome").textContent
+    ).toBe("Welcome");
   });
 });
