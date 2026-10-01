@@ -1,4 +1,8 @@
-import { LightningElement, api } from "lwc";
+import { LightningElement, api, wire } from "lwc";
+import { getRecord, getFieldValue } from "lightning/uiRecordApi";
+import USER_ID from "@salesforce/user/Id";
+import IS_GUEST from "@salesforce/user/isGuest";
+import USER_NAME from "@salesforce/schema/User.Name";
 
 const VIEW = {
   GRID: "grid",
@@ -16,6 +20,17 @@ export default class FamilyDashboard extends LightningElement {
 
   get showChat() {
     return !this.hideChat;
+  }
+
+  @wire(getRecord, { recordId: USER_ID, fields: [USER_NAME] })
+  signedInUser;
+
+  get welcomeText() {
+    const name =
+      !IS_GUEST && this.signedInUser?.data
+        ? getFieldValue(this.signedInUser.data, USER_NAME)
+        : null;
+    return name ? `Welcome, ${name}` : "Welcome";
   }
 
   currentView = VIEW.GRID;

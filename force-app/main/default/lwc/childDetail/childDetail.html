@@ -8,7 +8,7 @@
       Loading child details.
     </p>
 
-    <div lwc:if={isPopulated} class="notranslate">
+    <div lwc:if={isPopulated} class="detail__panel notranslate">
       <h3 class="detail__name">{displayName}</h3>
       <dl class="detail__facts">
         <dt>Grade</dt>
@@ -21,32 +21,34 @@
         <dd>{child.relationshipType}</dd>
       </dl>
 
-      <h4>Applications</h4>
-      <table lwc:if={hasApplications} class="detail__table">
-        <caption class="sr-only">
-          Applications for {displayName}
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">School</th>
-            <th scope="col">Status</th>
-            <th scope="col">Lottery #</th>
-            <th scope="col">Submitted</th>
-          </tr>
-        </thead>
-        <tbody>
-          <template for:each={applications} for:item="app">
-            <tr key={app.id}>
-              <td>{app.schoolName}</td>
-              <td>
-                <c-status-badge status={app.status}></c-status-badge>
-              </td>
-              <td>{app.lotteryNumber}</td>
-              <td>{app.submittedDate}</td>
+      <h4 class="detail__section-title">Applications</h4>
+      <div lwc:if={hasApplications} class="detail__table-wrap">
+        <table class="detail__table">
+          <caption class="sr-only">
+            Applications for {displayName}
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">School</th>
+              <th scope="col">Status</th>
+              <th scope="col">Lottery #</th>
+              <th scope="col">Submitted</th>
             </tr>
-          </template>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <template for:each={applications} for:item="app">
+              <tr key={app.id}>
+                <td>{app.schoolName}</td>
+                <td>
+                  <c-status-badge status={app.status}></c-status-badge>
+                </td>
+                <td>{app.lotteryNumber}</td>
+                <td>{app.submittedDate}</td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
       <p lwc:else>No applications yet for {displayName}.</p>
     </div>
 

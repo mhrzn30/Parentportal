@@ -1,3 +1,5 @@
+@import "c/portalTokens";
+
 .dialog-backdrop {
   position: fixed;
   inset: 0;
@@ -5,22 +7,22 @@
   align-items: center;
   justify-content: center;
   background: rgb(26 26 26 / 45%);
-  z-index: 2147483000;
+  z-index: var(--app-z-overlay);
 }
 
 .dialog {
   width: min(420px, calc(100vw - 32px));
-  padding: 24px;
-  border-radius: 12px;
-  background: var(--app-panel, #ffffff);
-  box-shadow: var(--app-shadow, 0 16px 44px rgb(26 26 26 / 22%));
+  padding: var(--app-space-6);
+  border-radius: var(--app-radius-md);
+  background: var(--app-color-surface);
+  box-shadow: var(--app-shadow-lg);
 }
 
 .dialog h2 {
-  margin: 0 0 8px;
+  margin: 0 0 var(--app-space-2);
 }
 
 .dialog p {
-  margin: 0 0 16px;
-  color: var(--app-muted, #5f6368);
+  margin: 0 0 var(--app-space-4);
+  color: var(--app-color-text-muted);
 }

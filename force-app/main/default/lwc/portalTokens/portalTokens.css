@@ -1,0 +1,85 @@
+/*
+ * Parent portal design tokens: the single source of truth.
+ * Use in any component with:  @import "c/portalTokens";
+ * Components use ROLE and SCALE tokens only, never palette tokens or raw values.
+ */
+:host {
+  /* 1. Palette: raw values. Only the roles below reference these. */
+  --app-palette-orange-50: #fff6ea;
+  --app-palette-orange-500: #f7941e;
+  --app-palette-orange-600: #da7a08;
+  --app-palette-orange-700: #a35a00; /* text-safe orange, 5.2:1 on white */
+  --app-palette-gray-50: #f7f8fa;
+  --app-palette-gray-100: #eceef1;
+  --app-palette-gray-200: #e3e6ea;
+  --app-palette-gray-500: #8a9099; /* 3.2:1 on white, meets non-text contrast */
+  --app-palette-gray-600: #5f6368;
+  --app-palette-gray-700: #3d4247;
+  --app-palette-gray-900: #1a1a1a;
+  --app-palette-white: #ffffff;
+  --app-palette-amber-50: #fdeed7;
+  --app-palette-amber-900: #7a4a04;
+  --app-palette-blue-50: #dceafe;
+  --app-palette-blue-900: #1c4a8f;
+  --app-palette-green-50: #dcf3e2;
+  --app-palette-green-900: #1a6b34;
+  --app-palette-red-50: #fdeceb;
+
+  /* 2. Roles: what components use */
+  /* Fills: buttons, launcher */
+  --app-color-accent: var(--app-palette-orange-500);
+  --app-color-accent-hover: var(--app-palette-orange-600);
+  /* Links and text on light backgrounds (fills fail AA as text) */
+  --app-color-accent-text: var(--app-palette-orange-700);
+  /* Avatar, tints */
+  --app-color-accent-subtle: var(--app-palette-orange-50);
+  /* Text on an orange fill */
+  --app-color-on-accent: var(--app-palette-gray-900);
+  --app-color-text: var(--app-palette-gray-900);
+  --app-color-text-muted: var(--app-palette-gray-600);
+  --app-color-border: var(--app-palette-gray-200);
+  /* Form field outlines: must reach 3:1 against the background (WCAG 1.4.11) */
+  --app-color-border-strong: var(--app-palette-gray-500);
+  --app-color-surface: var(--app-palette-white);
+  --app-color-background: var(--app-palette-gray-50);
+  --app-color-focus: var(--app-palette-orange-700);
+  --app-color-error-bg: var(--app-palette-red-50);
+
+  --app-color-status-warning-bg: var(--app-palette-amber-50);
+  --app-color-status-warning-text: var(--app-palette-amber-900);
+  --app-color-status-info-bg: var(--app-palette-blue-50);
+  --app-color-status-info-text: var(--app-palette-blue-900);
+  --app-color-status-success-bg: var(--app-palette-green-50);
+  --app-color-status-success-text: var(--app-palette-green-900);
+  --app-color-status-neutral-bg: var(--app-palette-gray-100);
+  --app-color-status-neutral-text: var(--app-palette-gray-700);
+
+  /* 3. Scales */
+  --app-space-1: 4px;
+  --app-space-2: 8px;
+  --app-space-3: 12px;
+  --app-space-4: 16px;
+  --app-space-5: 20px;
+  --app-space-6: 24px;
+
+  --app-radius-sm: 8px;
+  --app-radius-md: 12px;
+  --app-radius-lg: 16px;
+  --app-radius-pill: 999px;
+
+  --app-shadow-sm: 0 2px 8px rgb(26 26 26 / 6%);
+  --app-shadow-lg: 0 16px 44px rgb(26 26 26 / 22%);
+
+  --app-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --app-font-size-xs: 0.75rem; /* 12px */
+  --app-font-size-sm: 0.8125rem; /* 13px */
+  --app-font-size-md: 0.875rem; /* 14px */
+  --app-font-size-lg: 1rem; /* 16px */
+  --app-font-size-xl: 1.25rem; /* 20px */
+
+  /* Floating layers (chat, dialogs) sit above the Experience Cloud page chrome */
+  --app-z-overlay: 2147483000;
+
+  --app-motion-fast: 150ms;
+  --app-motion-ease: cubic-bezier(0.2, 0, 0, 1);
+}

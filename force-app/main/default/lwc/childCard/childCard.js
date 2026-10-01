@@ -10,6 +10,16 @@ export default class ChildCard extends LightningElement {
     return `${this.child.firstName} ${this.child.lastName}`;
   }
 
+  get initials() {
+    if (!this.child) {
+      return "";
+    }
+    return [this.child.firstName, this.child.lastName]
+      .map((part) => (part ? part.trim().charAt(0) : ""))
+      .join("")
+      .toUpperCase();
+  }
+
   get metaText() {
     if (!this.child) {
       return "";
